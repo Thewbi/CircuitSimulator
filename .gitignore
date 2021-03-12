@@ -30,3 +30,12 @@
 *.exe
 *.out
 *.app
+
+# debug build folder
+**\Debug
+*.idb
+*.pdb
+*.log
+*.tlog
+*.lastbuildstate
+*.CopyComplete
