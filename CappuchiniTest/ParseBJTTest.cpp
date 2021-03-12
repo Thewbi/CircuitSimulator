@@ -3,7 +3,13 @@
 #include "../Cappuchini/CircuitDescriptionParser.h"
 
 // For this test to work, follow https://docs.microsoft.com/en-us/previous-versions/visualstudio/visual-studio-2015/test/unit-testing-existing-cpp-applications-with-test-explorer?view=vs-2015#objectRef
-// If you want to test the class CircuitDescriptionParser, you have to add CircuitDescriptionParser.obj to 
+
+// If you want to test the class CircuitDescriptionParser
+// 1. In the Test Project, select the "References"/"Verweise" node and Select "Add reference" from the context menu.
+//    Add a reference to the main project folder.
+// 2. Open the properties of the test project > Liner > Allgemein > Zusätzliche Bibliotheksverzeichnisse > 
+//    Add the Debug folder of the main folder, so that the obj files are found
+// 3. you have to add CircuitDescriptionParser.obj to 
 // Linker > Input > AdditionalInput in the test project! Otherwise you get unresolved external symbols.
 
 TEST(ParseBJTTest, ParseBJT_NPN) {
