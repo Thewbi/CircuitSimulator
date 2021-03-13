@@ -1,0 +1,243 @@
+= Modified Nodal Analysis (MNA) =
+
+As an extension to the Nodal Analysis, CHuNG-WEN HO, ALBERT E. RUEHLI AND PIERCE A. BRENNAN,
+described their modified nodal analysis (MNA) method in their 1975 paper.
+
+The addition allows to create a matrix in linear time by iterating over the lines of a 
+textual description of a circuit. That matrix lends itself to equation solving algorithms.
+That means MNA allows the computation of any circuit by a computer which was not possible with
+standard nodal analysis.
+
+== Groups ==
+Before solving the linear equations, the equations have to be determined from the textual circuit 
+description. The equations are read from the MNA matrix. The MNA matrix has to be construted first,
+in linear time by reading the circuit description.
+
+To construct the MNA matrix, so called stamps are used.
+stamps are templates that prescribe which numbers to add into the elements of the MNA matrix
+for each lumped element in the circuit.
+
+Every lumped element has either one or two stamps of which exactly one is applied to the MNA matrix.
+
+If a lumped element has only a single stamp, that stamp is used for the element always.
+
+If a lumped element has two stamps, one of those stamps is choosen based on it's membership in 
+the groups. There are exactly two groups.
+When the element is in group 1, it's group 1 template is used.
+When the element is in group 2, it's group 2 template is used.
+
+That means, that during construction of the MNA matrix, the computer has to first determine
+if a lumped element in the circuit description belongs to group 1 or group 2. It then has to
+apply the correct stamp to build the matrix.
+
+group 1 elements are described as (see page.33 [2]);
+"Deﬁnition 2.6. (Element Groups) All elements whose currents are to be elimi-
+nated will be referred to as being in group 1 ..."
+
+group 2 elements are described as (see page.33 [2]);
+"..., while all other elements will be referred to as group 2."
+
+
+
+
+
+This definition does not allow for a programmer to implement the decision making in code.
+
+So a better definition of group 1 for implementars is given in (see page.33 [2])
+
+"Recall, the elements in group 1 must be either resistors, independent current
+sources, VCCS, or CCCS."
+
+And a better definition of group 2 is given in (see page.33 [2])
+"keeping in mind that the controlling element for the CCCS is in group 2"
+
+That means that for an element to go into group 1
+- the element is any type of Current Source, be it Independant, Voltage- or Current Controlled Current Sources
+- the element is a resistor that is not in group 2
+
+That means that for an element to go into group 2
+- the element is a resistor of which the current over the resistor is used as a control 
+  variable for Current sources
+- the element is not in group 1
+
+
+
+
+
+== Voltage and Current entries in the MNA matrix ==
+
+For all elements in group 1, there will be a voltage entry in the MNA matrix. (Current Source -> Voltage equation)
+For all elements in group 2, there will be a current entry in the MNA matrix. (Voltage Source -> Current equation)
+
+This can be derived by observing the excercise 2.10 in [2] 
+
+
+
+
+
+
+== Dimensions of the MNA Matrix =
+
+To find the dimension of the MNA matrix, first build the so-called "v i" - vector (short vi)
+
+vi is constructed with elements for all voltages and the elements for all currents appended to that.
+
+Example:
+If there are two voltages (v1 and v2) and to currents (i1 and i2) then vi looks like [v1 v2 i1 i2]T (T for transposed).
+The MNA matrix is then veT x ve, that means the MNA matrix is constructed from the 16 elements using the 
+columns v1 v2 i1 i2 as in viT and the rows v1, v2, i1, i2 as in vi
+
+How many v and i are there in the ie vector?
+For every element in group1, add a voltage element
+For every element in group2, add a current element
+
+So, if your circuit has n lumped elements, you will get a n x n MNA matrix.
+group 1 and group 2 form a partition over all elements in the circuit so 
+the amount of elements in group 1 added with the amount of elements in group 2 will add up to n.
+You will have size(group 1) voltage equations
+You will have size(group 2) current equations
+
+
+
+
+
+== Excercise 2.10 in [2] ==
+Algorithm:
+1. Count rows in the circuit description == amount of lumped elements == dimension of MNA matrix
+2. Add elements to groups:
+   - IVS -> group 2
+   - ICS -> group 1
+   - Resistor dependent on group tag in circuit description, either group 1 or group 2 if G2 tag is present
+3. Build stamps for each lumped element. Watch reference node 0 and collapse stamps accordingly
+4. Add stamps into the MNA matrix and RHS
+5. Output the result.
+
+
+
+
+
+
+== Stamps ==
+
+
+
+
+=== Resistors (R) ===
+
+Resistors have two stamps:
+
+Stamp for group 1:
+
+		v+		v-		RHS
+--------------------------------
+v+		1/R		-1/R
+v-		-1/R	1/R
+
+Stamp for group 2:
+
+		v+		v-		i		RHS
+----------------------------------------
+v+						+1
+v-						-1
+i		+1		-1		-R
+
+
+Collapsing:
+Stamps for group 1 resistors can collapse if the resistor is connected
+to the refernce node (0V) with one of it's terminals. The stamp then consist of only a single element:
+
+Let R be connected to a voltage v_2 using it's v+ terminal and to ground/reference with it's v- terminal
+Let R be a 1 ohm resistor
+Let R be a group 1 resistor
+
+The stamp originally is:
+
+		v+		v-		RHS
+--------------------------------
+v+		1/R		-1/R
+v-		-1/R	1/R
+
+Because of the reference connection to ground / reference, it collapse to
+
+		v_2		RHS
+------------------------
+v_2 	1
+
+Collapsing means, rows and columns of the terminals connected to ground / refernces are just ignored / removed
+from the stamp, or not added to the MNA matrix when that stamp is applied.
+
+
+
+
+
+== Independant Current Sources (ICS) ==
+
+ICS have two stamps:
+
+Stamp for group 1:
+
+		v+		v-		RHS
+---------------------------------
+v+						-I
+v-						+I
+
+Stamp for group 2:
+
+		v+		v-		i		RHS
+----------------------------------------
+v+						+1
+v-						-1
+i						+1		I
+
+== Independant Voltage Source (IVS) ==
+
+Has only a single stamp:
+
+		v+		v-		i		RHS
+----------------------------------------
+v+						+1
+v-						-1
+i		+1		-1				V
+
+== Voltage Controlled Voltage Source (VCVS) ==
+
+Has only a single stamp
+
+		v+		v-		v_x+		v_x-		i		RHS
+-----------------------------------------------------------------
+v+												+1
+v-												-1
+i		+1		-1		-k			+k
+
+== Current Controlled Voltage Source (CCVS) ==
+
+Has only a single timestamp
+
+		v+		v-		i_s			i_x			RHS
+-----------------------------------------------------------------
+v+						+1						
+v-						-1						
+i_s		+1		-1					-k
+i_x
+
+
+
+
+
+
+
+
+== Literature ==
+
+[1] @article{ho1975modified
+,	title	= {The modified nodal approach to network analysis}
+,	author	= {Ho, Chung-Wen and Ruehli, Albert E and Brennan, Pierce A}
+,	journal	= {Circuits and Systems, IEEE Transactions on}
+,	volume	= {22}
+,	number	= {6}
+,	pages	= {504--509}
+,	year	= {1975}
+,	publisher	= {IEEE}
+}
+
+[2] Farid N. Najm, Circuit Simulation, Wiley
