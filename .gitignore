@@ -33,9 +33,18 @@
 
 # debug build folder
 **\Debug
+*.db
+*.db-wal
+*.db-shm
 *.idb
+*.ipch
+*.ilk
+*.suo
+*.opendb
+*.testdurations
 *.pdb
 *.log
 *.tlog
 *.lastbuildstate
 *.CopyComplete
+packages/**
