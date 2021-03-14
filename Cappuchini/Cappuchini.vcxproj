@@ -127,10 +127,17 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="CircuitDescriptionParser.cpp" />
+    <ClCompile Include="Edge.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Node.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CircuitDescriptionParser.h" />
+    <ClInclude Include="CircuitElement.h" />
+    <ClInclude Include="Edge.h" />
+    <ClInclude Include="Edge.fwd.h" />
+    <ClInclude Include="Node.fwd.h" />
+    <ClInclude Include="Node.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
