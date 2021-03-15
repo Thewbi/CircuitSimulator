@@ -1,7 +1,41 @@
 #include "Node.h"
 #include "Edge.h"
 
-void Node::traverse(int& nextFreeIndex, std::map<std::string, int>& columnIndexMap, double(&mna)[SIZE][SIZE], double(&rhs)[SIZE])
+// Performs a pre-order traversal of the node graph to assemble the MNA matrix and the RHS vector, which
+// are then used to solve the system for voltages and currents.
+//
+// The traversal starts at a node which has to be different from the reference node 0.
+//
+// For a node, first the lumped elements connected to that node via edges are converted to their stamps
+// and values are inserted/added into the MNA according to the stamp.
+// A lumped element/edge is then marked as processed to prevent it from being inserted/added twice.
+// Then the node itself is marked as processed to prevent it from being inserted/added twice.
+//
+// After the connected lumped elements are inserted, the child nodes are recursed over to finalize the
+// graph traversal. Once all reachable nodes have been processed and the recursion ascends from the start
+// node, the process is finished and the MNA and RHS have been constructed.
+//
+// Lumped elements and nodes that have already been inserted/added are ignored when they are encountered for the second time.
+// The reference node 0 is ignored if it is encountered always, in general.
+//
+// For elemnts that have different stamps depending on which group they are contained in, the relevant
+// stamp is used (group 1 or group 2). A element is in group 2 if it's current is of interest in addition to the voltage over it.
+// The current is of importance for voltage sources (V) and for lumped elements which are used to control current controlled sources.
+// Such elements are somehow measured (not necessary via an physical trace/edge in the circuit/graph) and that measured current
+// is then used to control a current controlled source. Whenever an element's current is has to be known, that element
+// has to go into group 2.
+//
+// It is also possible to put a resistor into group 2 without it being used to control a source. This is just
+// if you want to know the current or if you want to test your algorithm. Putting a resistor into group 2 when it 
+// is not used to controll a current controlled source is optional!
+//
+// If a lumped element is connected to the reference node (node 0) with one of it's terminals, the stamp is reduced and the voltage
+// parts of the terminal connected to the reference node is ignored, which yields a simpler compacted/reduced stamp.
+// That stamp contributes less values to the MNA as opposed to a stamp where both terminals are connected to non-reference
+// nodes.
+// 
+//void Node::traverse(int& nextFreeIndex, std::map<std::string, int>& columnIndexMap, double(&mna)[SIZE][SIZE], double(&rhs)[SIZE])
+void Node::traverse(int& nextFreeIndex, std::map<std::string, int>& columnIndexMap, std::vector< std::vector<double> >& mna, std::vector<double>& rhs)
 {
 	// no operation for node 0
 	if (name.compare("0") == 0) {

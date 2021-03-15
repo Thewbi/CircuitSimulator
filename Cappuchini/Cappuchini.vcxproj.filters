@@ -47,5 +47,8 @@
     <ClInclude Include="CircuitElement.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
+    <ClInclude Include="main.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

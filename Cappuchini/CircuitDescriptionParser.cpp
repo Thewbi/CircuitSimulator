@@ -1,6 +1,7 @@
 #include "CircuitDescriptionParser.h"
 
 void CircuitDescriptionParser::parse(const std::string& infile) {
+
 	std::cout << infile << std::endl;
 
 	std::ifstream fileStream(infile);

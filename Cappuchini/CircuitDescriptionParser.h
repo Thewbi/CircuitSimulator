@@ -9,12 +9,11 @@
 
 #include "CircuitElement.h"
 
-
-
 class CircuitDescriptionParser
 {
 public:
 	std::vector<CircuitElement> circuitElements;
 	void parse(const std::string& infile);
 };
+
 

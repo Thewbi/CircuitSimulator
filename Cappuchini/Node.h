@@ -9,8 +9,6 @@
 #include "Edge.fwd.h"
 #include "Node.fwd.h"
 
-#define SIZE 2
-
 class Node
 {
 public:
@@ -19,6 +17,5 @@ public:
 	std::vector<std::shared_ptr<Edge>> edges;
 	bool processed;
 
-	void traverse(int& nextFreeIndex, std::map<std::string, int>& columnIndexMap, double (&mna)[SIZE][SIZE], double(&rhs)[SIZE]);
+	void traverse(int& nextFreeIndex, std::map<std::string, int>& columnIndexMap, std::vector< std::vector<double> >& mna, std::vector<double>& rhs);
 };
-
